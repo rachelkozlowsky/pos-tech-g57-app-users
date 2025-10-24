@@ -1,8 +1,9 @@
 name: CI/CD
+
 on:
   push:
     branches:
-      - develop
+      - main
   workflow_dispatch:
     inputs:
       run_validation_and_lint:
@@ -41,7 +42,7 @@ jobs:
     name: Load Config
     runs-on: ubuntu-latest
     outputs:
-      app_name: ${{ steps.load.outputs.app_name }}
+      app_name: ${{ steps.load.outputs.APP_NAME }}
       dockerhub_username: ${{ steps.load.outputs.DOCKERHUB_USERNAME }}
       cluster_name: ${{ steps.load.outputs.CLUSTER_NAME }}
       region_aws_deploy: ${{ steps.load.outputs.REGION_AWS_DEPLOY }}
@@ -54,30 +55,27 @@ jobs:
         id: load
         run: |
           while IFS=": " read -r key value; do
-            value=$(echo "$value" | xargs)
-            echo "$key=$value" >> $GITHUB_OUTPUT
+            echo "::set-output name=$key::$value"
           done < pipe.yml
 
   build-workflow:
     needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@develop
+    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml
     with:
       run_validation_and_lint: ${{ github.event.inputs.run_validation_and_lint }}
       run_build: ${{ github.event.inputs.run_build }}
       run_unit_test: ${{ github.event.inputs.run_unit_test }}
       app_name: ${{ needs.load-config.outputs.app_name }}
-    secrets: inherit
 
   gates-workflow:
     needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
+    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml
     with:
       run_sonar_scan: ${{ github.event.inputs.run_sonar_scan }}
-    secrets: inherit
 
   deploy-workflow:
     needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@develop
+    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml
     with:
       run_docker_build_and_push: ${{ github.event.inputs.run_docker_build_and_push }}
       run_deploy: ${{ github.event.inputs.run_deploy }}
@@ -86,4 +84,3 @@ jobs:
       cluster_name: ${{ needs.load-config.outputs.cluster_name }}
       region_aws_deploy: ${{ needs.load-config.outputs.region_aws_deploy }}
       domain_name: ${{ needs.load-config.outputs.domain_name }}
-    secrets: inherit
