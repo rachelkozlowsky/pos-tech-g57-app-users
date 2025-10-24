@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  call-reusable:
+  call-reusable-build-workflow:
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@develop
     with:
       java_version: "21"
@@ -15,6 +15,14 @@ jobs:
       run_build: true
       run_unit_test: true
     secrets: inherit
+
+  call-reusable-gates-workflow:
+    needs: call-reusable-build-workflow
+    if: always()
+    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
+    with:
+      run_sonar_scan: true
+
 
 
 #on:
