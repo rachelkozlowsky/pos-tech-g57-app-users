@@ -22,6 +22,7 @@ jobs:
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
     with:
       run_sonar_scan: true
+    secrets: inherit
 
 
 
