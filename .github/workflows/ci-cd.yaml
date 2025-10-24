@@ -68,13 +68,21 @@ jobs:
       - name: Set Default Values
         run: |
           echo "Setting default values for missing variables..."
-          echo "APP_NAME=${{ env.APP_NAME || 'default-app' }}" >> $GITHUB_ENV
-          echo "DOCKERHUB_USERNAME=${{ env.DOCKERHUB_USERNAME || 'postechf57' }}" >> $GITHUB_ENV
-          echo "CLUSTER_NAME=${{ env.CLUSTER_NAME || 'eks-postech-g57' }}" >> $GITHUB_ENV
-          echo "REGION_AWS_DEPLOY=${{ env.REGION_AWS_DEPLOY || 'us-east-1' }}" >> $GITHUB_ENV
-          echo "DOMAIN_NAME=${{ env.DOMAIN_NAME || 'pos-tech-g57-food-app.com.br' }}" >> $GITHUB_ENV
+          echo "APP_NAME=${APP_NAME:-default-app}" >> "$GITHUB_ENV"
+          echo "DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME:-postechf57}" >> "$GITHUB_ENV"
+          echo "CLUSTER_NAME=${CLUSTER_NAME:-eks-postech-g57}" >> "$GITHUB_ENV"
+          echo "REGION_AWS_DEPLOY=${REGION_AWS_DEPLOY:-us-east-1}" >> "$GITHUB_ENV"
+          echo "DOMAIN_NAME=${DOMAIN_NAME:-pos-tech-g57-food-app.com.br}" >> "$GITHUB_ENV"
 
       - name: Display Outputs
+        run: |
+          echo "App Name: ${APP_NAME}"
+          echo "DockerHub Username: ${DOCKERHUB_USERNAME}"
+          echo "Cluster Name: ${CLUSTER_NAME}"
+          echo "Region AWS Deploy: ${REGION_AWS_DEPLOY}"
+          echo "Domain Name: ${DOMAIN_NAME}"
+
+      - name: Set job outputs
         id: set_outputs
         run: |
           echo "app_name=${APP_NAME}" >> "$GITHUB_OUTPUT"
@@ -82,7 +90,6 @@ jobs:
           echo "cluster_name=${CLUSTER_NAME}" >> "$GITHUB_OUTPUT"
           echo "region_aws_deploy=${REGION_AWS_DEPLOY}" >> "$GITHUB_OUTPUT"
           echo "domain_name=${DOMAIN_NAME}" >> "$GITHUB_OUTPUT"
-
 
   build-workflow:
     needs: load-config
