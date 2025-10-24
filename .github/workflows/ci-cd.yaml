@@ -73,7 +73,6 @@ jobs:
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
     with:
       run_sonar_scan: ${{ github.event.inputs.run_sonar_scan }}
-      app_name: ${{ needs.load-config.outputs.app_name }}
     secrets: inherit
 
   deploy-workflow:
