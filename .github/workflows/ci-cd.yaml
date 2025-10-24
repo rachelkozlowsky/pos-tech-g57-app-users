@@ -2,7 +2,7 @@ name: CI/CD
 on:
   push:
     branches:
-      - main
+      - develop
   workflow_dispatch:
     inputs:
       run_validation_and_lint:
@@ -53,6 +53,7 @@ jobs:
       - name: Load pipe.yml
         id: load
         run: |
+          echo "teste"
           while IFS=": " read -r key value; do
             echo "::set-output name=$key::$value"
           done < pipe.yml
