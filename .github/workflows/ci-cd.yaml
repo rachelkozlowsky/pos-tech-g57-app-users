@@ -82,21 +82,9 @@ jobs:
           echo "region_aws_deploy=${REGION_AWS_DEPLOY}" >> "$GITHUB_OUTPUT"
           echo "domain_name=${DOMAIN_NAME}" >> "$GITHUB_OUTPUT"
 
-  debug-outputs:
-    name: Debug Outputs
-    needs: load-config
-    runs-on: ubuntu-latest
-    steps:
-      - name: Exibir valores propagados
-        run: |
-          echo "App Name: ${{ needs.load-config.outputs.app_name }}"
-          echo "DockerHub Username: ${{ needs.load-config.outputs.dockerhub_username }}"
-          echo "Cluster Name: ${{ needs.load-config.outputs.cluster_name }}"
-          echo "Region AWS Deploy: ${{ needs.load-config.outputs.region_aws_deploy }}"
-          echo "Domain Name: ${{ needs.load-config.outputs.domain_name }}"
 
   build-workflow:
-    needs: debug-outputs
+    needs: load-config
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@develop
     with:
       run_validation_and_lint: ${{ github.event.inputs.run_validation_and_lint }}
@@ -109,13 +97,13 @@ jobs:
       domain_name: ${{ needs.load-config.outputs.domain_name }}
 
   gates-workflow:
-    needs: debug-outputs
+    needs: load-config
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
     with:
       run_sonar_scan: ${{ github.event.inputs.run_sonar_scan }}
 
   deploy-workflow:
-    needs: debug-outputs
+    needs: load-config
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@develop
     with:
       run_docker_build_and_push: ${{ github.event.inputs.run_docker_build_and_push }}
