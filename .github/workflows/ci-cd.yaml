@@ -74,12 +74,13 @@ jobs:
 
       - name: Display Outputs
         env:
+          APP_NAME: ${{ env.APP_NAME }}
           DOCKERHUB_USERNAME: ${{ env.DOCKERHUB_USERNAME }}
           CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
           REGION_AWS_DEPLOY: ${{ env.REGION_AWS_DEPLOY }}
           DOMAIN_NAME: ${{ env.DOMAIN_NAME }}
         run: |
-            echo "App Name: ${{ steps.load.outputs.app_name }}"
+            echo "App Name: $APP_NAME"
             echo "DockerHub Username: $DOCKERHUB_USERNAME"
             echo "Cluster Name: $CLUSTER_NAME"
             echo "Region AWS Deploy: $REGION_AWS_DEPLOY"
