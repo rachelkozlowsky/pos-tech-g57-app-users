@@ -37,7 +37,7 @@ jobs:
     name: Load Config
     runs-on: ubuntu-latest
     outputs:
-      app_name: ${{ steps.set-output.outputs.app_name }}
+      app_name: ${{ env.APP_NAME }}
       dockerhub_username: ${{ env.DOCKERHUB_USERNAME }}
       cluster_name: ${{ env.CLUSTER_NAME }}
       region_aws_deploy: ${{ env.REGION_AWS_DEPLOY }}
@@ -73,7 +73,7 @@ jobs:
 
       - name: Display Outputs
         run: |
-          echo "App Name: ${{steps.load.outputs.app_name || env.APP_NAME}}"
+          echo "App Name: ${{env.APP_NAME}}"
           echo "DockerHub Username: $DOCKERHUB_USERNAME"
           echo "Cluster Name: $CLUSTER_NAME"
           echo "Region AWS Deploy: $REGION_AWS_DEPLOY"
@@ -86,14 +86,14 @@ jobs:
     steps:
       - name: Exibir valores propagados
         run: |
-          echo "App Name: ${{ needs.load-config.outputs.app_name }}"
+          echo "App Name: ${{ env.APP_NAME }}"
           echo "DockerHub Username: ${{ needs.load-config.outputs.dockerhub_username }}"
           echo "Cluster Name: ${{ needs.load-config.outputs.cluster_name }}"
           echo "Region AWS Deploy: ${{ needs.load-config.outputs.region_aws_deploy }}"
           echo "Domain Name: ${{ needs.load-config.outputs.domain_name }}"
 
   build-workflow:
-    needs: load-config
+    needs: debug-outputs
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@develop
     with:
       run_validation_and_lint: ${{ github.event.inputs.run_validation_and_lint }}
@@ -106,13 +106,13 @@ jobs:
       domain_name: ${{ needs.load-config.outputs.domain_name }}
 
   gates-workflow:
-    needs: load-config
+    needs: debug-outputs
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
     with:
       run_sonar_scan: ${{ github.event.inputs.run_sonar_scan }}
 
   deploy-workflow:
-    needs: load-config
+    needs: debug-outputs
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@develop
     with:
       run_docker_build_and_push: ${{ github.event.inputs.run_docker_build_and_push }}
