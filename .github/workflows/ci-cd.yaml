@@ -31,22 +31,22 @@ on:
         required: true
         default: true
         type: boolean
-      #run_deploy:
-        #description: 'Executar Deploy'
-        #required: true
-        #default: true
-        #type: boolean
+      run_deploy:
+        description: 'Executar Deploy'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   load-config:
     name: Load Config
     runs-on: ubuntu-latest
     outputs:
-      app_name: ${{ steps.load.outputs.APP_NAME }}
-      dockerhub_username: ${{ steps.load.outputs.DOCKERHUB_USERNAME }}
-      cluster_name: ${{ steps.load.outputs.CLUSTER_NAME }}
-      region_aws_deploy: ${{ steps.load.outputs.REGION_AWS_DEPLOY }}
-      domain_name: ${{ steps.load.outputs.DOMAIN_NAME }}
+      app_name: ${{ steps.load.outputs.app_name }}
+      dockerhub_username: ${{ steps.load.outputs.dockerhub_username }}
+      cluster_name: ${{ steps.load.outputs.cluster_name }}
+      region_aws_deploy: ${{ steps.load.outputs.region_aws_deploy }}
+      domain_name: ${{ steps.load.outputs.domain_name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -54,9 +54,24 @@ jobs:
       - name: Load pipe.yml
         id: load
         run: |
-          while IFS=": " read -r key value; do
-            echo "::set-output name=$key::$value"
-          done < pipe.yml
+            if [ ! -f pipe.yml ]; then
+              echo "pipe.yml not found" >&2
+              exit 1
+            fi
+            while IFS=':' read -r raw_key raw_value; do
+              key=$(echo "$raw_key" | xargs | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_]/_/g')
+              value=$(echo "$raw_value" | xargs)
+              echo "${key}=${value}" >> "$GITHUB_ENV"
+              echo "::set-output name=${key}::${value}"
+            done < pipe.yml
+
+      - name: Display Outputs
+        run: |
+          echo "App Name: ${{ steps.load.outputs.app_name }}"
+          echo "DockerHub Username: ${{ steps.load.outputs.dockerhub_username }}"
+          echo "Cluster Name: ${{ steps.load.outputs.cluster_name }}"
+          echo "Region AWS Deploy: ${{ steps.load.outputs.region_aws_deploy }}"
+          echo "Domain Name: ${{ steps.load.outputs.domain_name }}"
 
   build-workflow:
     needs: load-config
@@ -65,22 +80,22 @@ jobs:
       run_validation_and_lint: ${{ github.event.inputs.run_validation_and_lint }}
       run_build: ${{ github.event.inputs.run_build }}
       run_unit_test: ${{ github.event.inputs.run_unit_test }}
-      app_name: ${{ needs.load-config.outputs.app_name }}
+      app_name: ${{ env.APP_NAME }}
 
   gates-workflow:
-    needs: load-config
+    needs: build-workflow
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
     with:
       run_sonar_scan: ${{ github.event.inputs.run_sonar_scan }}
 
   deploy-workflow:
-    needs: load-config
+    needs: gates-workflow
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@develop
     with:
       run_docker_build_and_push: ${{ github.event.inputs.run_docker_build_and_push }}
       run_deploy: ${{ github.event.inputs.run_deploy }}
-      app_name: ${{ needs.load-config.outputs.app_name }}
-      dockerhub_username: ${{ needs.load-config.outputs.dockerhub_username }}
-      cluster_name: ${{ needs.load-config.outputs.cluster_name }}
-      region_aws_deploy: ${{ needs.load-config.outputs.region_aws_deploy }}
-      domain_name: ${{ needs.load-config.outputs.domain_name }}
+      app_name: ${{ env.APP_NAME }}
+      dockerhub_username: ${{ env.DOCKERHUB_USERNAME }}
+      cluster_name: ${{ env.CLUSTER_NAME }}
+      region_aws_deploy: ${{ env.REGION_AWS_DEPLOY }}
+      domain_name: ${{ env.DOMAIN_NAME }}
