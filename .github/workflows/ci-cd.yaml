@@ -79,6 +79,19 @@ jobs:
           echo "Region AWS Deploy: $REGION_AWS_DEPLOY"
           echo "Domain Name: $DOMAIN_NAME"
 
+  debug-outputs:
+    name: Debug Outputs
+    needs: load-config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exibir valores propagados
+        run: |
+          echo "App Name: ${{ needs.load-config.outputs.app_name }}"
+          echo "DockerHub Username: ${{ needs.load-config.outputs.dockerhub_username }}"
+          echo "Cluster Name: ${{ needs.load-config.outputs.cluster_name }}"
+          echo "Region AWS Deploy: ${{ needs.load-config.outputs.region_aws_deploy }}"
+          echo "Domain Name: ${{ needs.load-config.outputs.domain_name }}"
+
   build-workflow:
     needs: load-config
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@develop
