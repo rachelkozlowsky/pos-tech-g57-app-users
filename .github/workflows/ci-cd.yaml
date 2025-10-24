@@ -53,30 +53,32 @@ jobs:
       - name: Load pipe.yml
         id: load
         run: |
-          echo "teste"
           while IFS=": " read -r key value; do
-            echo "::set-output name=$key::$value"
+            value=$(echo "$value" | xargs)
+            echo "$key=$value" >> $GITHUB_OUTPUT
           done < pipe.yml
 
   build-workflow:
     needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@main
+    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@develop
     with:
       run_validation_and_lint: ${{ github.event.inputs.run_validation_and_lint }}
       run_build: ${{ github.event.inputs.run_build }}
       run_unit_test: ${{ github.event.inputs.run_unit_test }}
       app_name: ${{ needs.load-config.outputs.app_name }}
+    secrets: inherit
 
   gates-workflow:
     needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@main
+    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
     with:
       run_sonar_scan: ${{ github.event.inputs.run_sonar_scan }}
       app_name: ${{ needs.load-config.outputs.app_name }}
+    secrets: inherit
 
   deploy-workflow:
     needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@main
+    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@develop
     with:
       run_docker_build_and_push: ${{ github.event.inputs.run_docker_build_and_push }}
       run_deploy: ${{ github.event.inputs.run_deploy }}
@@ -85,3 +87,4 @@ jobs:
       cluster_name: ${{ needs.load-config.outputs.cluster_name }}
       region_aws_deploy: ${{ needs.load-config.outputs.region_aws_deploy }}
       domain_name: ${{ needs.load-config.outputs.domain_name }}
+    secrets: inherit
