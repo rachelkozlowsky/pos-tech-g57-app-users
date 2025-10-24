@@ -37,11 +37,7 @@ jobs:
     name: Load Config
     runs-on: ubuntu-latest
     outputs:
-      app_name: ${{ steps.load.outputs.app_name }}
-      dockerhub_username: ${{ env.DOCKERHUB_USERNAME }}
-      cluster_name: ${{ env.CLUSTER_NAME }}
-      region_aws_deploy: ${{ env.REGION_AWS_DEPLOY }}
-      domain_name: ${{ env.DOMAIN_NAME }}
+      app_name: ${{ steps.set-output.outputs.app_name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -56,8 +52,15 @@ jobs:
           while IFS=':' read -r raw_key raw_value; do
             key=$(echo "$raw_key" | xargs | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_]/_/g')
             value=$(echo "$raw_value" | xargs)
-            echo "${key}=${value}" >> "$GITHUB_ENV"
+            if [ "$key" = "app_name" ]; then
+              echo "APP_NAME=$value" >> "$GITHUB_ENV"
+              echo "::set-output name=app_name::$value" # Compatibilidade com outputs
+            fi
           done < pipe.yml
+
+      - name: Set Output
+        id: set-output
+        run: echo "::set-output name=app_name::${{ env.APP_NAME }}"
 
       - name: Set Default Values
         run: |
@@ -70,7 +73,7 @@ jobs:
 
       - name: Display Outputs
         run: |
-          echo "App Name: ${{steps.load.outputs.app_name}}"
+          echo "App Name: ${{steps.load.outputs.app_name || env.APP_NAME}}"
           echo "DockerHub Username: $DOCKERHUB_USERNAME"
           echo "Cluster Name: $CLUSTER_NAME"
           echo "Region AWS Deploy: $REGION_AWS_DEPLOY"
