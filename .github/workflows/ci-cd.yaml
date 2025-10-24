@@ -75,6 +75,7 @@ jobs:
           echo "DOMAIN_NAME=${{ env.DOMAIN_NAME || 'pos-tech-g57-food-app.com.br' }}" >> $GITHUB_ENV
 
       - name: Display Outputs
+        id: set_outputs
         run: |
           echo "app_name=${APP_NAME}" >> "$GITHUB_OUTPUT"
           echo "dockerhub_username=${DOCKERHUB_USERNAME}" >> "$GITHUB_OUTPUT"
