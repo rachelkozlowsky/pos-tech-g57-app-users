@@ -37,11 +37,11 @@ jobs:
     name: Load Config
     runs-on: ubuntu-latest
     outputs:
-      app_name: ${{ steps.load.outputs.app_name }}
-      dockerhub_username: ${{ env.DOCKERHUB_USERNAME }}
-      cluster_name: ${{ env.CLUSTER_NAME }}
-      region_aws_deploy: ${{ env.REGION_AWS_DEPLOY }}
-      domain_name: ${{ env.DOMAIN_NAME }}
+      app_name: ${{ steps.set_outputs.outputs.app_name }}
+      dockerhub_username: ${{ steps.set_outputs.outputs.dockerhub_username }}
+      cluster_name: ${{ steps.set_outputs.outputs.cluster_name }}
+      region_aws_deploy: ${{ steps.set_outputs.outputs.region_aws_deploy }}
+      domain_name: ${{ steps.set_outputs.outputs.domain_name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -56,10 +56,13 @@ jobs:
           while IFS=':' read -r raw_key raw_value; do
             key=$(echo "$raw_key" | xargs | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_]/_/g')
             value=$(echo "$raw_value" | xargs)
-            if [ "$key" = "app_name" ]; then
-              echo "APP_NAME=$value" >> "$GITHUB_ENV"
-              echo "::set-output name=app_name::$value" # Compatibilidade com outputs
-            fi
+            case "$key" in
+              app_name) echo "APP_NAME=$value" >> "$GITHUB_ENV" ;;
+              dockerhub_username) echo "DOCKERHUB_USERNAME=$value" >> "$GITHUB_ENV" ;;
+              cluster_name) echo "CLUSTER_NAME=$value" >> "$GITHUB_ENV" ;;
+              region_aws_deploy) echo "REGION_AWS_DEPLOY=$value" >> "$GITHUB_ENV" ;;
+              domain_name) echo "DOMAIN_NAME=$value" >> "$GITHUB_ENV" ;;
+            esac
           done < pipe.yml
 
       - name: Set Default Values
@@ -73,11 +76,11 @@ jobs:
 
       - name: Display Outputs
         run: |
-          echo "App Name: ${{env.APP_NAME}}"
-          echo "DockerHub Username: $DOCKERHUB_USERNAME"
-          echo "Cluster Name: $CLUSTER_NAME"
-          echo "Region AWS Deploy: $REGION_AWS_DEPLOY"
-          echo "Domain Name: $DOMAIN_NAME"
+          echo "App Name: $APP_NAME" >> "$GITHUB_OUTPUT"
+          echo "DockerHub Username: $DOCKERHUB_USERNAME" >> "$GITHUB_OUTPUT"
+          echo "Cluster Name: $CLUSTER_NAME" >> "$GITHUB_OUTPUT"
+          echo "Region AWS Deploy: $REGION_AWS_DEPLOY" >> "$GITHUB_OUTPUT"
+          echo "Domain Name: $DOMAIN_NAME" >> "$GITHUB_OUTPUT"
 
   debug-outputs:
     name: Debug Outputs
@@ -86,7 +89,7 @@ jobs:
     steps:
       - name: Exibir valores propagados
         run: |
-          echo "App Name: ${{ steps.load.outputs.app_name }}"
+          echo "App Name: ${{ needs.load-config.outputs.app_name }}"
           echo "DockerHub Username: ${{ needs.load-config.outputs.dockerhub_username }}"
           echo "Cluster Name: ${{ needs.load-config.outputs.cluster_name }}"
           echo "Region AWS Deploy: ${{ needs.load-config.outputs.region_aws_deploy }}"
