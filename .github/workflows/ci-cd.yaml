@@ -31,6 +31,11 @@ on:
         required: true
         default: true
         type: boolean
+#      run_deploy:
+#        description: 'Executar Deploy'
+#        required: false
+#        default: true
+#        type: boolean
 
 jobs:
   load-config:
@@ -110,14 +115,14 @@ jobs:
     with:
       run_sonar_scan: ${{ github.event.inputs.run_sonar_scan }}
 
-  deploy-workflow:
-    needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@develop
-    with:
-      run_docker_build_and_push: ${{ github.event.inputs.run_docker_build_and_push }}
-      run_deploy: ${{ github.event.inputs.run_deploy }}
-      app_name: ${{ needs.load-config.outputs.app_name }}
-      dockerhub_username: ${{ needs.load-config.outputs.dockerhub_username }}
-      cluster_name: ${{ needs.load-config.outputs.cluster_name }}
-      region_aws_deploy: ${{ needs.load-config.outputs.region_aws_deploy }}
-      domain_name: ${{ needs.load-config.outputs.domain_name }}
+#  deploy-workflow:
+#    needs: load-config
+#    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@develop
+#    with:
+#      run_docker_build_and_push: ${{ github.event.inputs.run_docker_build_and_push }}
+#      run_deploy: ${{ github.event.inputs.run_deploy }}
+#      app_name: ${{ needs.load-config.outputs.app_name }}
+#      dockerhub_username: ${{ needs.load-config.outputs.dockerhub_username }}
+#      cluster_name: ${{ needs.load-config.outputs.cluster_name }}
+#      region_aws_deploy: ${{ needs.load-config.outputs.region_aws_deploy }}
+#      domain_name: ${{ needs.load-config.outputs.domain_name }}
