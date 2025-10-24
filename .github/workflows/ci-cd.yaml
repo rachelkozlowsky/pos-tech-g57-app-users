@@ -38,6 +38,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       app_name: ${{ steps.set-output.outputs.app_name }}
+      dockerhub_username: ${{ env.DOCKERHUB_USERNAME }}
+      cluster_name: ${{ env.CLUSTER_NAME }}
+      region_aws_deploy: ${{ env.REGION_AWS_DEPLOY }}
+      domain_name: ${{ env.DOMAIN_NAME }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -57,10 +61,6 @@ jobs:
               echo "::set-output name=app_name::$value" # Compatibilidade com outputs
             fi
           done < pipe.yml
-
-      - name: Set Output
-        id: set-output
-        run: echo "::set-output name=app_name::${{ env.APP_NAME }}"
 
       - name: Set Default Values
         run: |
