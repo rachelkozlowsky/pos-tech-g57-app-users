@@ -31,22 +31,17 @@ on:
         required: true
         default: true
         type: boolean
-        #run_deploy:
-        #description: 'Executar Deploy'
-        #required: true
-        #default: true
-        #type: boolean
 
 jobs:
   load-config:
     name: Load Config
     runs-on: ubuntu-latest
     outputs:
-      app_name: ${{ steps.load.outputs.APP_NAME }}
-      dockerhub_username: ${{ steps.load.outputs.DOCKERHUB_USERNAME }}
-      cluster_name: ${{ steps.load.outputs.CLUSTER_NAME }}
-      region_aws_deploy: ${{ steps.load.outputs.REGION_AWS_DEPLOY }}
-      domain_name: ${{ steps.load.outputs.DOMAIN_NAME }}
+      app_name: ${{ env.APP_NAME }}
+      dockerhub_username: ${{ env.DOCKERHUB_USERNAME }}
+      cluster_name: ${{ env.CLUSTER_NAME }}
+      region_aws_deploy: ${{ env.REGION_AWS_DEPLOY }}
+      domain_name: ${{ env.DOMAIN_NAME }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -66,26 +61,20 @@ jobs:
 
       - name: Set Default Values
         run: |
-            echo "Setting default values for missing variables..."
-            echo "APP_NAME=${{ steps.load.outputs.app_name }}" >> $GITHUB_ENV
-            echo "DOCKERHUB_USERNAME=${{ steps.load.outputs.dockerhub_username || 'postechf57' }}" >> $GITHUB_ENV
-            echo "CLUSTER_NAME=${{ steps.load.outputs.cluster_name || 'eks-postech-g57' }}" >> $GITHUB_ENV
-            echo "REGION_AWS_DEPLOY=${{ steps.load.outputs.region_aws_deploy || 'us-east-1' }}" >> $GITHUB_ENV
-            echo "DOMAIN_NAME=${{ steps.load.outputs.domain_name || 'pos-tech-g57-food-app.com.br' }}" >> $GITHUB_ENV
+          echo "Setting default values for missing variables..."
+          echo "APP_NAME=${{ env.APP_NAME || 'default-app' }}" >> $GITHUB_ENV
+          echo "DOCKERHUB_USERNAME=${{ env.DOCKERHUB_USERNAME || 'postechf57' }}" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=${{ env.CLUSTER_NAME || 'eks-postech-g57' }}" >> $GITHUB_ENV
+          echo "REGION_AWS_DEPLOY=${{ env.REGION_AWS_DEPLOY || 'us-east-1' }}" >> $GITHUB_ENV
+          echo "DOMAIN_NAME=${{ env.DOMAIN_NAME || 'pos-tech-g57-food-app.com.br' }}" >> $GITHUB_ENV
 
       - name: Display Outputs
-        env:
-          APP_NAME: ${{ env.APP_NAME }}
-          DOCKERHUB_USERNAME: ${{ env.DOCKERHUB_USERNAME }}
-          CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
-          REGION_AWS_DEPLOY: ${{ env.REGION_AWS_DEPLOY }}
-          DOMAIN_NAME: ${{ env.DOMAIN_NAME }}
         run: |
-            echo "App Name: $APP_NAME"
-            echo "DockerHub Username: $DOCKERHUB_USERNAME"
-            echo "Cluster Name: $CLUSTER_NAME"
-            echo "Region AWS Deploy: $REGION_AWS_DEPLOY"
-            echo "Domain Name: $DOMAIN_NAME"
+          echo "App Name: $APP_NAME"
+          echo "DockerHub Username: $DOCKERHUB_USERNAME"
+          echo "Cluster Name: $CLUSTER_NAME"
+          echo "Region AWS Deploy: $REGION_AWS_DEPLOY"
+          echo "Domain Name: $DOMAIN_NAME"
 
   build-workflow:
     needs: load-config
