@@ -68,10 +68,10 @@ jobs:
       - name: Set Default Values
         run: |
           echo "Setting default values for missing variables..."
-          echo "::set-output name=dockerhub_username::${{ steps.load.outputs.dockerhub_username || 'postechf57' }}"
-          echo "::set-output name=cluster_name::${{ steps.load.outputs.cluster_name || 'eks-postech-g57' }}"
-          echo "::set-output name=region_aws_deploy::${{ steps.load.outputs.region_aws_deploy || 'us-east-1' }}"
-          echo "::set-outp
+          echo "DOCKERHUB_USERNAME=${{ steps.load.outputs.dockerhub_username || 'postechf57' }}" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=${{ steps.load.outputs.cluster_name || 'eks-postech-g57' }}" >> $GITHUB_ENV
+          echo "REGION_AWS_DEPLOY=${{ steps.load.outputs.region_aws_deploy || 'us-east-1' }}" >> $GITHUB_ENV
+          echo "DOMAIN_NAME=${{ steps.load.outputs.domain_name || 'pos-tech-g57-food-app.com.br' }}" >> $GITHUB_ENV
 
       - name: Display Outputs
         run: |
