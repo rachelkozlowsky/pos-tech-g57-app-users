@@ -42,11 +42,11 @@ jobs:
     name: Load Config
     runs-on: ubuntu-latest
     outputs:
-      app_name: ${{ steps.load.outputs.APP_NAME }}
-      dockerhub_username: ${{ steps.load.outputs.DOCKERHUB_USERNAME }}
-      cluster_name: ${{ steps.load.outputs.CLUSTER_NAME }}
-      region_aws_deploy: ${{ steps.load.outputs.REGION_AWS_DEPLOY }}
-      domain_name: ${{ steps.load.outputs.DOMAIN_NAME }}
+      app_name: 'Teste'
+      dockerhub_username: 'Teste'
+      cluster_name: 'Teste'
+      region_aws_deploy: 'Teste'
+      domain_name: 'Teste'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -61,6 +61,7 @@ jobs:
   variables-config:
     name: Variables
     runs-on: ubuntu-latest
+    needs: load-config
     steps:
       - name: Teste
         id: teste
