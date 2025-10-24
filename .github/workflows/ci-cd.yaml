@@ -61,11 +61,7 @@ jobs:
       - name: Teste
         id: teste
         run: |
-          echo app_name ${{load-config.outputs.app_name}}
-          echo dockerhub_username ${{load-config.outputs.dockerhub_username}}
-          echo cluster_name ${{load-config.outputs.cluster_name}}
-          echo region_aws_deploy ${{load-config.outputs.region_aws_deploy}}
-          echo domain_name ${{load-config.outputs.domain_name}}
+          echo githuboutput ${{GITHUB_OUTPUT}}
 
   build-workflow:
     needs: load-config
