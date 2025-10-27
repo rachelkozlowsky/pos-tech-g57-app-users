@@ -15,138 +15,26 @@ jobs:
       run_build_and_test: true
     secrets: inherit
 
-  call-reusable-gates-workflow:
+  package-for-sonar:
+    name: Package Artifacts for Sonar
+    runs-on: ubuntu-latest
     needs: call-reusable-build-workflow
+    if: always()
+    steps:
+      - name: Download all artifacts from build job
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Upload combined artifact for Sonar
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts/build-artifacts/target
+
+  sonar-gates:
+    needs: package-for-sonar
     if: always()
     uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
     with:
       run_sonar_scan: true
     secrets: inherit
-
-
-#on:
-#  push:
-#    branches:
-#      - develop
-#  workflow_dispatch:
-#    inputs:
-#      run_validation_and_lint:
-#        description: 'Executar Validation & Code Quality'
-#        required: true
-#        default: true
-#        type: boolean
-#      run_build:
-#        description: 'Executar Build Maven'
-#        required: true
-#        default: true
-#        type: boolean
-#      run_unit_test:
-#        description: 'Executar Testes Unitários'
-#        required: true
-#        default: true
-#        type: boolean
-#      run_sonar_scan:
-#        description: 'Executar Sonar Scan'
-#        required: true
-#        default: true
-#        type: boolean
-#      run_docker_build_and_push:
-#        description: 'Executar Build e Push do Docker'
-#        required: true
-#        default: true
-#        type: boolean
-##      run_deploy:
-##        description: 'Executar Deploy'
-##        required: false
-##        default: true
-##        type: boolean
-#
-#jobs:
-#  load-config:
-#    name: Load Config
-#    runs-on: ubuntu-latest
-#    outputs:
-#      app_name: ${{ steps.set_outputs.outputs.app_name }}
-#      dockerhub_username: ${{ steps.set_outputs.outputs.dockerhub_username }}
-#      cluster_name: ${{ steps.set_outputs.outputs.cluster_name }}
-#      region_aws_deploy: ${{ steps.set_outputs.outputs.region_aws_deploy }}
-#      domain_name: ${{ steps.set_outputs.outputs.domain_name }}
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#
-#      - name: Load pipe.yml
-#        id: load
-#        run: |
-#          if [ ! -f pipe.yml ]; then
-#            echo "pipe.yml not found" >&2
-#            exit 1
-#          fi
-#          while IFS=':' read -r raw_key raw_value; do
-#            key=$(echo "$raw_key" | xargs | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_]/_/g')
-#            value=$(echo "$raw_value" | xargs)
-#            case "$key" in
-#              app_name) echo "APP_NAME=$value" >> "$GITHUB_ENV" ;;
-#              dockerhub_username) echo "DOCKERHUB_USERNAME=$value" >> "$GITHUB_ENV" ;;
-#              cluster_name) echo "CLUSTER_NAME=$value" >> "$GITHUB_ENV" ;;
-#              region_aws_deploy) echo "REGION_AWS_DEPLOY=$value" >> "$GITHUB_ENV" ;;
-#              domain_name) echo "DOMAIN_NAME=$value" >> "$GITHUB_ENV" ;;
-#            esac
-#          done < pipe.yml
-#
-#      - name: Set Default Values
-#        run: |
-#          echo "Setting default values for missing variables..."
-#          echo "APP_NAME=${APP_NAME:-default-app}" >> "$GITHUB_ENV"
-#          echo "DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME:-postechf57}" >> "$GITHUB_ENV"
-#          echo "CLUSTER_NAME=${CLUSTER_NAME:-eks-postech-g57}" >> "$GITHUB_ENV"
-#          echo "REGION_AWS_DEPLOY=${REGION_AWS_DEPLOY:-us-east-1}" >> "$GITHUB_ENV"
-#          echo "DOMAIN_NAME=${DOMAIN_NAME:-pos-tech-g57-food-app.com.br}" >> "$GITHUB_ENV"
-#
-#      - name: Display Outputs
-#        run: |
-#          echo "App Name: ${APP_NAME}"
-#          echo "DockerHub Username: ${DOCKERHUB_USERNAME}"
-#          echo "Cluster Name: ${CLUSTER_NAME}"
-#          echo "Region AWS Deploy: ${REGION_AWS_DEPLOY}"
-#          echo "Domain Name: ${DOMAIN_NAME}"
-#
-#      - name: Set job outputs
-#        id: set_outputs
-#        run: |
-#          echo "app_name=${APP_NAME}" >> "$GITHUB_OUTPUT"
-#          echo "dockerhub_username=${DOCKERHUB_USERNAME}" >> "$GITHUB_OUTPUT"
-#          echo "cluster_name=${CLUSTER_NAME}" >> "$GITHUB_OUTPUT"
-#          echo "region_aws_deploy=${REGION_AWS_DEPLOY}" >> "$GITHUB_OUTPUT"
-#          echo "domain_name=${DOMAIN_NAME}" >> "$GITHUB_OUTPUT"
-#
-#  build-workflow:
-#    needs: load-config
-#    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@develop
-#    with:
-#      run_validation_and_lint: ${{ github.event.inputs.run_validation_and_lint }}
-#      run_build: ${{ github.event.inputs.run_build }}
-#      run_unit_test: ${{ github.event.inputs.run_unit_test }}
-#      app_name: ${{ needs.load-config.outputs.app_name }}
-#      dockerhub_username: ${{ needs.load-config.outputs.dockerhub_username }}
-#      cluster_name: ${{ needs.load-config.outputs.cluster_name }}
-#      region_aws_deploy: ${{ needs.load-config.outputs.region_aws_deploy }}
-#      domain_name: ${{ needs.load-config.outputs.domain_name }}
-#
-#  gates-workflow:
-#    needs: load-config
-#    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@develop
-#    with:
-#      run_sonar_scan: ${{ github.event.inputs.run_sonar_scan }}
-
-#  deploy-workflow:
-#    needs: load-config
-#    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@develop
-#    with:
-#      run_docker_build_and_push: ${{ github.event.inputs.run_docker_build_and_push }}
-#      run_deploy: ${{ github.event.inputs.run_deploy }}
-#      app_name: ${{ needs.load-config.outputs.app_name }}
-#      dockerhub_username: ${{ needs.load-config.outputs.dockerhub_username }}
-#      cluster_name: ${{ needs.load-config.outputs.cluster_name }}
-#      region_aws_deploy: ${{ needs.load-config.outputs.region_aws_deploy }}
-#      domain_name: ${{ needs.load-config.outputs.domain_name }}
