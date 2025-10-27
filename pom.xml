@@ -20,6 +20,7 @@
         <org.projectlombok.version>1.18.30</org.projectlombok.version>
         <sonar.version>5.1.0.4751</sonar.version>
         <jacoco.version>0.8.10</jacoco.version>
+        <sonar.organization>rachelkozlowsky</sonar.organization>
         <sonar.exclusions>
             **/TechFoodFiveSevenApplication*,**/devcontroller/**/*.*,**/utils/*,**/domain/**/*.*,**/entity/**/*.*,**/*Config/*,**/infra/**/*.*,**/*Request*,**/*Response*,**Handler*,*pom.xml
         </sonar.exclusions>

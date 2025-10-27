@@ -1,86 +1,17 @@
 name: CI/CD
+
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
-    inputs:
-      run_validation_and_lint:
-        description: 'Executar Validation & Code Quality'
-        required: true
-        default: true
-        type: boolean
-      run_build:
-        description: 'Executar Build Maven'
-        required: true
-        default: true
-        type: boolean
-      run_unit_test:
-        description: 'Executar Testes Unitários'
-        required: true
-        default: true
-        type: boolean
-      run_sonar_scan:
-        description: 'Executar Sonar Scan'
-        required: true
-        default: true
-        type: boolean
-      run_docker_build_and_push:
-        description: 'Executar Build e Push do Docker'
-        required: true
-        default: true
-        type: boolean
-      #run_deploy:
-        #description: 'Executar Deploy'
-        #required: true
-        #default: true
-        #type: boolean
+    branches: [ develop, main ]
+  workflow_dispatch: {}
 
 jobs:
-  load-config:
-    name: Load Config
-    runs-on: ubuntu-latest
-    outputs:
-      app_name: ${{ steps.load.outputs.APP_NAME }}
-      dockerhub_username: ${{ steps.load.outputs.DOCKERHUB_USERNAME }}
-      cluster_name: ${{ steps.load.outputs.CLUSTER_NAME }}
-      region_aws_deploy: ${{ steps.load.outputs.REGION_AWS_DEPLOY }}
-      domain_name: ${{ steps.load.outputs.DOMAIN_NAME }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Load pipe.yml
-        id: load
-        run: |
-          while IFS=": " read -r key value; do
-            echo "::set-output name=$key::$value"
-          done < pipe.yml
-
-  build-workflow:
-    needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@main
+  call-reusable-build-and-test-workflow:
+    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/build.yml@develop
     with:
-      run_validation_and_lint: ${{ github.event.inputs.run_validation_and_lint }}
-      run_build: ${{ github.event.inputs.run_build }}
-      run_unit_test: ${{ github.event.inputs.run_unit_test }}
-      app_name: ${{ needs.load-config.outputs.app_name }}
-
-  gates-workflow:
-    needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/gates.yml@main
-    with:
-      run_sonar_scan: ${{ github.event.inputs.run_sonar_scan }}
-      app_name: ${{ needs.load-config.outputs.app_name }}
-
-  deploy-workflow:
-    needs: load-config
-    uses: rachelkozlowsky/nested-reusable-java-maven-eks/.github/workflows/deploy.yml@main
-    with:
-      run_docker_build_and_push: ${{ github.event.inputs.run_docker_build_and_push }}
-      run_deploy: ${{ github.event.inputs.run_deploy }}
-      app_name: ${{ needs.load-config.outputs.app_name }}
-      dockerhub_username: ${{ needs.load-config.outputs.dockerhub_username }}
-      cluster_name: ${{ needs.load-config.outputs.cluster_name }}
-      region_aws_deploy: ${{ needs.load-config.outputs.region_aws_deploy }}
-      domain_name: ${{ needs.load-config.outputs.domain_name }}
+      java_version: "21"
+      app_name: "pos-tech-g57-app-users"
+      run_validation_and_lint: true
+      run_build_and_test: true
+      run_gates: true
+    secrets: inherit
