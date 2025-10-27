@@ -158,6 +158,7 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
@@ -171,7 +172,8 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
                             <formats>
-                                <format>xml</format>
+                                <format>XML</format>
+                                <format>HTML</format>
                             </formats>
                         </configuration>
                     </execution>
