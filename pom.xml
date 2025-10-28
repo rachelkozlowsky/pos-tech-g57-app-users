@@ -22,7 +22,7 @@
         <jacoco.version>0.8.10</jacoco.version>
         <sonar.organization>rachelkozlowsky</sonar.organization>
         <sonar.exclusions>
-            **/UsersApplication*,**/utils/*,**/domain/**/*.*,**/entity/**/*.*,**/infra/**/*.*,**/*request*,**/*response*,**handler*,*pom.xml
+            **/UsersApplication.java,**/devcontroller/**/*.*,**/utils/**/*.*,**/domain/**/*.*,**/entity/**/*.*,**/*Config/**/*.*,**/infra/**/*.*,**/*ClientRequest.java,**/ClientResponse.java,**/HealthController.java,**handler*
         </sonar.exclusions>
     </properties>
     <dependencies>
