@@ -22,7 +22,7 @@
         <jacoco.version>0.8.10</jacoco.version>
         <sonar.organization>rachelkozlowsky</sonar.organization>
         <sonar.exclusions>
-            **/TechFoodFiveSevenApplication*,**/devcontroller/**/*.*,**/utils/*,**/domain/**/*.*,**/entity/**/*.*,**/*Config/*,**/infra/**/*.*,**/*Request*,**/*Response*,**Handler*,*pom.xml
+            **/UsersApplication*,**/utils/*,**/domain/**/*.*,**/entity/**/*.*,**/infra/**/*.*,**/*request*,**/*response*,**handler*,*pom.xml
         </sonar.exclusions>
     </properties>
     <dependencies>
