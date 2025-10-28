@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -210,4 +211,155 @@ class ClientServiceTest {
 
         verify(clientRepository).delete("12345678901");
     }
+
+    @Test
+    void createClientWhenClientNotExistsShouldSaveNewClient() throws ValidationException {
+        try (MockedStatic<ValidationUtil> validationUtil = mockStatic(ValidationUtil.class);
+             MockedStatic<FoodUtils> foodUtils = mockStatic(FoodUtils.class)) {
+
+            validationUtil.when(() -> ValidationUtil.validarCPF(anyString())).thenReturn(true);
+            validationUtil.when(() -> ValidationUtil.validarEmail(anyString())).thenReturn(true);
+            foodUtils.when(() -> FoodUtils.limparString(anyString())).thenReturn("12345678901");
+
+            when(clientRepository.findByCpf("12345678901")).thenReturn(null);
+            when(clientRepository.save(any(Client.class))).thenReturn(validClient);
+
+            Client result = clientService.createClient(validClient);
+
+            assertNotNull(result);
+            verify(clientRepository).save(any(Client.class));
+        }
+    }
+
+    @Test
+    void createClientWhenClientExistsShouldCallUpdate() throws ValidationException {
+        try (MockedStatic<ValidationUtil> validationUtil = mockStatic(ValidationUtil.class);
+             MockedStatic<FoodUtils> foodUtils = mockStatic(FoodUtils.class)) {
+
+            validationUtil.when(() -> ValidationUtil.validarCPF(anyString())).thenReturn(true);
+            validationUtil.when(() -> ValidationUtil.validarEmail(anyString())).thenReturn(true);
+            foodUtils.when(() -> FoodUtils.limparString(anyString())).thenReturn("12345678901");
+
+            Client existingClient = new Client();
+            existingClient.setId("1");
+            existingClient.setCpf("12345678901");
+            existingClient.setCreatedAt(LocalDateTime.now().minusDays(1));
+
+            when(clientRepository.findByCpf("12345678901")).thenReturn(existingClient);
+            when(clientRepository.save(any(Client.class))).thenReturn(validClient);
+
+            Client result = clientService.createClient(validClient);
+
+            assertNotNull(result);
+            verify(clientRepository, times(1)).save(any(Client.class));
+        }
+    }
+
+    @Test
+    void updateWhenClientNotFoundShouldThrowValidationException() {
+        when(clientRepository.findByCpf("12345678901")).thenReturn(null);
+
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> clientService.update("12345678901", validClient));
+
+        assertEquals("Client not found", exception.getMessage());
+    }
+
+    @Test
+    void validateClientShouldThrowWhenCpfIsInvalid() {
+        try (MockedStatic<ValidationUtil> validationUtil = mockStatic(ValidationUtil.class)) {
+            validationUtil.when(() -> ValidationUtil.validarCPF(anyString())).thenReturn(false);
+
+            Client invalidClient = new Client();
+            invalidClient.setName("John");
+            invalidClient.setCpf("12345678901");
+            invalidClient.setEmail("john@example.com");
+
+            ValidationException exception = assertThrows(ValidationException.class,
+                    () -> clientService.createClient(invalidClient));
+
+            assertEquals("Client cpf cannot be valid", exception.getMessage());
+        }
+    }
+
+    @Test
+    void validateClientShouldThrowWhenEmailIsInvalid() {
+        try (MockedStatic<ValidationUtil> validationUtil = mockStatic(ValidationUtil.class)) {
+            validationUtil.when(() -> ValidationUtil.validarCPF(anyString())).thenReturn(true);
+            validationUtil.when(() -> ValidationUtil.validarEmail(anyString())).thenReturn(false);
+
+            Client invalidEmailClient = new Client();
+            invalidEmailClient.setName("John");
+            invalidEmailClient.setCpf("12345678901");
+            invalidEmailClient.setEmail("invalid");
+
+            ValidationException exception = assertThrows(ValidationException.class,
+                    () -> clientService.createClient(invalidEmailClient));
+
+            assertEquals("Client email cannot be valid", exception.getMessage());
+        }
+    }
+
+    @Test
+    void validateClientShouldThrowWhenNameIsNull() {
+        Client client = new Client();
+        client.setName(null);
+        client.setCpf("12345678901");
+        client.setEmail("john@example.com");
+
+        ValidationException ex = assertThrows(ValidationException.class,
+                () -> clientService.createClient(client));
+
+        assertEquals("Client name cannot be empty", ex.getMessage());
+    }
+
+    @Test
+    void validateClientShouldThrowWhenNameIsEmpty() {
+        Client client = new Client();
+        client.setName("");
+        client.setCpf("12345678901");
+        client.setEmail("john@example.com");
+
+        ValidationException ex = assertThrows(ValidationException.class,
+                () -> clientService.createClient(client));
+
+        assertEquals("Client name cannot be empty", ex.getMessage());
+    }
+
+    @Test
+    void validateClientShouldThrowWhenEmailIsNull() {
+        try (MockedStatic<ValidationUtil> validationUtil = mockStatic(ValidationUtil.class)) {
+            validationUtil.when(() -> ValidationUtil.validarCPF(anyString())).thenReturn(true);
+
+            Client client = new Client();
+            client.setName("John Doe");
+            client.setCpf("12345678901");
+            client.setEmail(null);
+
+            ValidationException ex = assertThrows(ValidationException.class,
+                    () -> clientService.createClient(client));
+
+            assertEquals("Client cpf cannot be empty", ex.getMessage());
+        }
+    }
+
+    @Test
+    void validateClientShouldPassWhenAllFieldsAreValid() throws ValidationException {
+        try (MockedStatic<ValidationUtil> validationUtil = mockStatic(ValidationUtil.class);
+             MockedStatic<FoodUtils> foodUtils = mockStatic(FoodUtils.class)) {
+
+            validationUtil.when(() -> ValidationUtil.validarCPF(anyString())).thenReturn(true);
+            validationUtil.when(() -> ValidationUtil.validarEmail(anyString())).thenReturn(true);
+            foodUtils.when(() -> FoodUtils.limparString(anyString())).thenReturn("12345678901");
+
+            when(clientRepository.findByCpf("12345678901")).thenReturn(null);
+            when(clientRepository.save(any(Client.class))).thenReturn(validClient);
+
+            Client result = clientService.createClient(validClient);
+
+            assertNotNull(result);
+            verify(clientRepository).save(any(Client.class));
+        }
+    }
+
 }
