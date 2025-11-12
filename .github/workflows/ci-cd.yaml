@@ -14,4 +14,6 @@ jobs:
       run_validation_and_lint: true
       run_build_and_test: true
       run_gates: true
+      run_docker_build_and_push: true
+      run_deploy: true
     secrets: inherit
