@@ -19,7 +19,7 @@ spec:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: api-config
+                name: api-config-users
             - secretRef:
                 name: api-secret
           resources:
