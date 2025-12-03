@@ -13,7 +13,7 @@ spring:
   application:
     name: api-food
   datasource:
-    url: jdbc:postgresql://${db_host}:5432/food_db
+    url: jdbc:postgresql://${db_host}:5432/food_users_db
     username: ${db_username}
     password: ${db_password}
     driver-class-name: org.postgresql.Driver
