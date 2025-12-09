@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: api-food
+  datasource:
+    url: jdbc:postgresql://localhost:5432/food_oders_db
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
