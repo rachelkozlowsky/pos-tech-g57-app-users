@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: api-config
+  name: api-config-users
   namespace: users
 ---
 apiVersion: v1
