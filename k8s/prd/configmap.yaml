@@ -3,10 +3,5 @@ kind: ConfigMap
 metadata:
   name: api-config-users
   namespace: users
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: api-secret
-data: {}
-type: Opaque
+data:
+  ENVIRONMENT_PROFILE_VALUE: prd

@@ -54,20 +54,20 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: api-food-service
+            name: api-food-users-service
             port:
               number: 80
       - path: /actuator
         pathType: Prefix
         backend:
           service:
-            name: api-food-service
+            name: api-food-users-service
             port:
               number: 80
       - path: /health
         pathType: Prefix
         backend:
           service:
-            name: api-food-service
+            name: api-food-users-service
             port:
               number: 80
